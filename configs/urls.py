@@ -30,6 +30,10 @@ urlpatterns = [
         '',
         include('contas.urls')
     ),
+    path(
+    'api/produtos/',
+    include('produtos.urls')
+),
 
 ]
 
