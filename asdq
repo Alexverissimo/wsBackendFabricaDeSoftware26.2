@@ -1,0 +1,29 @@
+[33mcommit af939ddc3412bb63fad764068bfdb11f0d0b5636[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/login[m[33m)[m
+Author: Alex <alexverissimo98@gmail.com>
+Date:   Fri Aug 28 23:09:57 2026 -0300
+
+    feat: cadastro implementado
+
+[33mcommit 370967128efc7f5805fd87bbc151717a98422e88[m
+Author: Alex <alexverissimo98@gmail.com>
+Date:   Fri Aug 28 22:56:54 2026 -0300
+
+    feat:criacao login page e jwt
+
+[33mcommit e97df7851c8a0307162953e02e617081f359a691[m[33m ([m[1;31morigin/develop[m[33m, [m[1;32mdevelop[m[33m)[m
+Author: Alex <alexverissimo98@gmail.com>
+Date:   Fri Aug 28 21:59:27 2026 -0300
+
+    feat: configuracao jwt authentication
+
+[33mcommit 1bf40db170a239a14668d7af1e55d738ac946a29[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: Alex <alexverissimo98@gmail.com>
+Date:   Fri Aug 28 21:39:27 2026 -0300
+
+    chore: projeto django iniciado
+
+[33mcommit 60207c61a043f774813c69db04029bd1fbca8548[m
+Author: Alex <alexverissimo98@gmail.com>
+Date:   Fri Aug 28 18:40:13 2026 -0300
+
+    first

@@ -1,23 +1,20 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render
-
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 
 def login_page(request):
     return render(request, 'contas/login.html')
 
 def cadastro_page(request):
-    return render(
-        request,
-        'contas/cadastro.html'
-    )
+    return render(request, 'contas/cadastro.html')
 
+def home_page(request):
+    return render(request, 'contas/home.html')
 
 class RegisterView(APIView):
-
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -42,4 +39,16 @@ class RegisterView(APIView):
         return Response(
             {'detail': 'Usuário criado com sucesso.'},
             status=status.HTTP_201_CREATED
+        )
+
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(
+            {
+                'id': request.user.id,
+                'username': request.user.username
+            }
         )

@@ -3,7 +3,9 @@ from django.urls import path
 from .views import (
 login_page,
 cadastro_page,
-RegisterView
+home_page,
+RegisterView,
+MeView
 )
 
 urlpatterns = [
@@ -25,5 +27,17 @@ path(
     RegisterView.as_view(),
     name='register'
 ),
+
+path(
+    'home/',
+    home_page,
+    name='home'
+),
+path(
+'api/auth/me/',
+MeView.as_view(),
+name='me'
+),
+
 
 ]
