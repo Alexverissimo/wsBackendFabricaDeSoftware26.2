@@ -15,10 +15,19 @@ class CategoriaSerializer(serializers.ModelSerializer):
 
 class ProdutoSerializer(serializers.ModelSerializer):
 
-    categoria = CategoriaSerializer(read_only=True)
+    categoria = serializers.PrimaryKeyRelatedField(
+        queryset=Categoria.objects.all(),
+        write_only=True
+    )
+
+    categoria_detalhes = CategoriaSerializer(
+        source='categoria',
+        read_only=True
+    )
 
     class Meta:
         model = Produto
+
         fields = [
             'id',
             'id_externo',
@@ -28,4 +37,5 @@ class ProdutoSerializer(serializers.ModelSerializer):
             'estoque',
             'imagem',
             'categoria',
+            'categoria_detalhes',
         ]
