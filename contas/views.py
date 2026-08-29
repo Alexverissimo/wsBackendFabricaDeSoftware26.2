@@ -9,6 +9,12 @@ from rest_framework.views import APIView
 def login_page(request):
     return render(request, 'contas/login.html')
 
+def cadastro_page(request):
+    return render(
+        request,
+        'contas/cadastro.html'
+    )
+
 
 class RegisterView(APIView):
 
