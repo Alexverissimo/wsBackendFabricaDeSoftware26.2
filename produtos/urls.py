@@ -10,7 +10,8 @@ from .views import (
     CarrinhoView,
     AdicionarCarrinhoView,
     RemoverItemCarrinhoView,
-    AlterarQuantidadeCarrinhoView
+    AlterarQuantidadeCarrinhoView,
+    FinalizarCompraView
 )
 
 
@@ -64,6 +65,12 @@ urlpatterns = [
         'carrinho/item/<int:item_id>/quantidade/',
         AlterarQuantidadeCarrinhoView.as_view(),
         name='carrinho-quantidade'
+    ),
+
+    path(
+        'checkout/',
+        FinalizarCompraView.as_view(),
+        name='checkout'
     ),
 
     path(

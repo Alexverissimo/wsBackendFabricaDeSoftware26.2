@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 
 
 class Categoria(models.Model):
-
     nome = models.CharField(
         max_length=100,
         unique=True
@@ -14,7 +13,6 @@ class Categoria(models.Model):
 
 
 class Produto(models.Model):
-
     id_externo = models.IntegerField(
         unique=True
     )
@@ -47,7 +45,6 @@ class Produto(models.Model):
 
 
 class Carrinho(models.Model):
-
     usuario = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -63,7 +60,6 @@ class Carrinho(models.Model):
 
 
 class ItemCarrinho(models.Model):
-
     carrinho = models.ForeignKey(
         Carrinho,
         on_delete=models.CASCADE,
@@ -77,6 +73,50 @@ class ItemCarrinho(models.Model):
 
     quantidade = models.PositiveIntegerField(
         default=1
+    )
+
+    def __str__(self):
+        return f'{self.produto.nome} - {self.quantidade}'
+
+
+class Pedido(models.Model):
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='pedidos'
+    )
+
+    criado_em = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    def __str__(self):
+        return f'Pedido #{self.id} - {self.usuario.username}'
+
+
+class ItemPedido(models.Model):
+    pedido = models.ForeignKey(
+        Pedido,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+
+    produto = models.ForeignKey(
+        Produto,
+        on_delete=models.PROTECT
+    )
+
+    quantidade = models.PositiveIntegerField()
+
+    preco_unitario = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
     )
 
     def __str__(self):

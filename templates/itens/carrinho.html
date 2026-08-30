@@ -100,7 +100,6 @@
                     'access_token'
                 );
 
-
             if (!token) {
 
                 window.location.href = '/';
@@ -108,7 +107,6 @@
                 return;
 
             }
-
 
             try {
 
@@ -121,7 +119,6 @@
                         }
                     }
                 );
-
 
                 if (!response.ok) {
 
@@ -139,14 +136,11 @@
 
                 }
 
-
                 const usuario =
                     await response.json();
 
-
                 userName.textContent =
                     `Olá, ${usuario.username}`;
-
 
             } catch (error) {
 
@@ -166,7 +160,6 @@
                     'access_token'
                 );
 
-
             if (!token) {
 
                 window.location.href = '/';
@@ -175,13 +168,11 @@
 
             }
 
-
             cartContainer.innerHTML = `
                 <div class="text-center">
                     Carregando carrinho...
                 </div>
             `;
-
 
             try {
 
@@ -195,10 +186,8 @@
                     }
                 );
 
-
                 const data =
                     await response.json();
-
 
                 if (!response.ok) {
 
@@ -212,7 +201,6 @@
 
                 }
 
-
                 if (data.itens.length === 0) {
 
                     cartContainer.innerHTML = `
@@ -225,12 +213,9 @@
 
                 }
 
-
                 cartContainer.innerHTML = '';
 
-
                 let total = 0;
-
 
                 data.itens.forEach(item => {
 
@@ -242,19 +227,15 @@
                             item.subtotal
                         );
 
-
                     total += subtotal;
-
 
                     const itemElement =
                         document.createElement(
                             'div'
                         );
 
-
                     itemElement.className =
                         'card mb-3 shadow-sm';
-
 
                     itemElement.innerHTML = `
 
@@ -276,7 +257,6 @@
 
                                 </div>
 
-
                                 <div class="col-md-4">
 
                                     <h5>
@@ -288,7 +268,6 @@
                                     </p>
 
                                 </div>
-
 
                                 <div class="col-md-2">
 
@@ -321,11 +300,9 @@
                                             -
                                         </button>
 
-
                                         <span>
                                             ${item.quantidade}
                                         </span>
-
 
                                         <button
                                             class="
@@ -347,7 +324,6 @@
 
                                 </div>
 
-
                                 <div class="col-md-2">
 
                                     <strong>
@@ -359,7 +335,6 @@
                                     </p>
 
                                 </div>
-
 
                                 <div class="col-md-2">
 
@@ -382,24 +357,19 @@
 
                     `;
 
-
-                    cartContainer
-                        .appendChild(
-                            itemElement
-                        );
+                    cartContainer.appendChild(
+                        itemElement
+                    );
 
                 });
-
 
                 const totalElement =
                     document.createElement(
                         'div'
                     );
 
-
                 totalElement.className =
                     'text-end mt-4';
-
 
                 totalElement.innerHTML = `
 
@@ -408,7 +378,6 @@
                         R$ ${total.toFixed(2)}
                     </h3>
 
-
                     <button
                         class="
                             btn
@@ -416,23 +385,20 @@
                             btn-lg
                             mt-3
                         "
+                        onclick="finalizarCompra()"
                     >
                         Finalizar compra
                     </button>
 
                 `;
 
-
-                cartContainer
-                    .appendChild(
-                        totalElement
-                    );
-
+                cartContainer.appendChild(
+                    totalElement
+                );
 
             } catch (error) {
 
                 console.error(error);
-
 
                 cartContainer.innerHTML = `
                     <div class="alert alert-danger">
@@ -454,7 +420,6 @@
                     'access_token'
                 );
 
-
             if (!token) {
 
                 window.location.href = '/';
@@ -462,7 +427,6 @@
                 return;
 
             }
-
 
             try {
 
@@ -478,12 +442,10 @@
                     }
                 );
 
-
                 if (!response.ok) {
 
                     const data =
                         await response.json();
-
 
                     alert(
                         data.detail ||
@@ -494,14 +456,11 @@
 
                 }
 
-
                 carregarCarrinho();
-
 
             } catch (error) {
 
                 console.error(error);
-
 
                 alert(
                     'Não foi possível remover o item.'
@@ -523,12 +482,10 @@
 
             }
 
-
             const token =
                 localStorage.getItem(
                     'access_token'
                 );
-
 
             if (!token) {
 
@@ -537,7 +494,6 @@
                 return;
 
             }
-
 
             try {
 
@@ -562,10 +518,8 @@
                     }
                 );
 
-
                 const data =
                     await response.json();
-
 
                 if (!response.ok) {
 
@@ -578,17 +532,76 @@
 
                 }
 
-
                 carregarCarrinho();
-
 
             } catch (error) {
 
                 console.error(error);
 
-
                 alert(
                     'Não foi possível alterar a quantidade.'
+                );
+
+            }
+
+        }
+
+
+        async function finalizarCompra() {
+
+            const token =
+                localStorage.getItem(
+                    'access_token'
+                );
+
+            if (!token) {
+
+                window.location.href = '/';
+
+                return;
+
+            }
+
+            try {
+
+                const response = await fetch(
+                    '/api/produtos/checkout/',
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            'Authorization':
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    alert(
+                        data.detail ||
+                        'Erro ao finalizar compra.'
+                    );
+
+                    return;
+
+                }
+
+                alert(
+                    `Compra finalizada com sucesso!\nPedido: #${data.pedido_id}\nTotal: R$ ${parseFloat(data.total).toFixed(2)}`
+                );
+
+                carregarCarrinho();
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    'Não foi possível finalizar a compra.'
                 );
 
             }

@@ -1,12 +1,7 @@
+from django.db import transaction
 from django.shortcuts import render
 
-from rest_framework import (
-    generics,
-    viewsets,
-    filters,
-    status
-)
-
+from rest_framework import generics, viewsets, filters, status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -14,7 +9,9 @@ from rest_framework.response import Response
 from .models import (
     Produto,
     Carrinho,
-    ItemCarrinho
+    ItemCarrinho,
+    Pedido,
+    ItemPedido
 )
 
 from .serializers import (
@@ -23,45 +20,24 @@ from .serializers import (
 )
 
 
-
 class ProdutoListView(generics.ListAPIView):
-
-    queryset = Produto.objects.select_related(
-        'categoria'
-    ).all()
-
+    queryset = Produto.objects.select_related('categoria').all()
     serializer_class = ProdutoSerializer
-
-    filter_backends = [
-        filters.SearchFilter
-    ]
-
-    search_fields = [
-        'nome',
-        'descricao',
-    ]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nome', 'descricao']
 
 
 class ProdutoDetailView(generics.RetrieveAPIView):
-
-    queryset = Produto.objects.select_related(
-        'categoria'
-    ).all()
-
+    queryset = Produto.objects.select_related('categoria').all()
     serializer_class = ProdutoSerializer
 
 
 class ProdutoViewSet(viewsets.ModelViewSet):
-
-    queryset = Produto.objects.select_related(
-        'categoria'
-    ).all()
-
+    queryset = Produto.objects.select_related('categoria').all()
     serializer_class = ProdutoSerializer
 
 
 def produtos_page(request):
-
     return render(
         request,
         'itens/produtos.html'
@@ -69,7 +45,6 @@ def produtos_page(request):
 
 
 def carrinho_page(request):
-
     return render(
         request,
         'itens/carrinho.html'
@@ -77,13 +52,9 @@ def carrinho_page(request):
 
 
 class CarrinhoView(APIView):
-
-    permission_classes = [
-        IsAuthenticated
-    ]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-
         carrinho, _ = Carrinho.objects.get_or_create(
             usuario=request.user
         )
@@ -95,21 +66,17 @@ class CarrinhoView(APIView):
         return Response(
             serializer.data
         )
-    
-class AdicionarCarrinhoView(APIView):
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+
+class AdicionarCarrinhoView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
-
         produto_id = request.data.get(
             'produto_id'
         )
 
         if not produto_id:
-
             return Response(
                 {
                     'detail':
@@ -119,13 +86,11 @@ class AdicionarCarrinhoView(APIView):
             )
 
         try:
-
             produto = Produto.objects.get(
                 id=produto_id
             )
 
         except Produto.DoesNotExist:
-
             return Response(
                 {
                     'detail':
@@ -147,9 +112,7 @@ class AdicionarCarrinhoView(APIView):
         )
 
         if not criado:
-
             item.quantidade += 1
-
             item.save()
 
         serializer = CarrinhoSerializer(
@@ -163,26 +126,16 @@ class AdicionarCarrinhoView(APIView):
 
 
 class RemoverItemCarrinhoView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    permission_classes = [
-        IsAuthenticated
-    ]
-
-    def delete(
-        self,
-        request,
-        item_id
-    ):
-
+    def delete(self, request, item_id):
         try:
-
             item = ItemCarrinho.objects.get(
                 id=item_id,
                 carrinho__usuario=request.user
             )
 
         except ItemCarrinho.DoesNotExist:
-
             return Response(
                 {
                     'detail':
@@ -199,32 +152,19 @@ class RemoverItemCarrinhoView(APIView):
 
 
 class AlterarQuantidadeCarrinhoView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    permission_classes = [
-        IsAuthenticated
-    ]
-
-    def patch(
-        self,
-        request,
-        item_id
-    ):
-
+    def patch(self, request, item_id):
         quantidade = request.data.get(
             'quantidade'
         )
 
         try:
-
             quantidade = int(
                 quantidade
             )
 
-        except (
-            TypeError,
-            ValueError
-        ):
-
+        except (TypeError, ValueError):
             return Response(
                 {
                     'detail':
@@ -234,7 +174,6 @@ class AlterarQuantidadeCarrinhoView(APIView):
             )
 
         if quantidade < 1:
-
             return Response(
                 {
                     'detail':
@@ -244,14 +183,12 @@ class AlterarQuantidadeCarrinhoView(APIView):
             )
 
         try:
-
             item = ItemCarrinho.objects.get(
                 id=item_id,
                 carrinho__usuario=request.user
             )
 
         except ItemCarrinho.DoesNotExist:
-
             return Response(
                 {
                     'detail':
@@ -261,7 +198,6 @@ class AlterarQuantidadeCarrinhoView(APIView):
             )
 
         item.quantidade = quantidade
-
         item.save()
 
         serializer = CarrinhoSerializer(
@@ -271,4 +207,75 @@ class AlterarQuantidadeCarrinhoView(APIView):
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
+        )
+
+
+class FinalizarCompraView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            carrinho = Carrinho.objects.get(
+                usuario=request.user
+            )
+
+        except Carrinho.DoesNotExist:
+            return Response(
+                {
+                    'detail':
+                    'Carrinho não encontrado.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        itens = carrinho.itens.select_related(
+            'produto'
+        ).all()
+
+        if not itens.exists():
+            return Response(
+                {
+                    'detail':
+                    'O carrinho está vazio.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            pedido = Pedido.objects.create(
+                usuario=request.user
+            )
+
+            total = 0
+
+            for item in itens:
+                subtotal = (
+                    item.produto.preco *
+                    item.quantidade
+                )
+
+                total += subtotal
+
+                ItemPedido.objects.create(
+                    pedido=pedido,
+                    produto=item.produto,
+                    quantidade=item.quantidade,
+                    preco_unitario=item.produto.preco
+                )
+
+            pedido.total = total
+            pedido.save()
+
+            itens.delete()
+
+        return Response(
+            {
+                'detail':
+                'Compra finalizada com sucesso.',
+                'pedido_id':
+                pedido.id,
+                'total':
+                pedido.total
+            },
+            status=status.HTTP_201_CREATED
         )
