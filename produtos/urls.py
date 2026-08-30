@@ -4,7 +4,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ProdutoListView,
     ProdutoDetailView,
-    ProdutoViewSet
+    ProdutoViewSet,
+    produtos_page
 )
 
 
@@ -29,6 +30,12 @@ urlpatterns = [
         '<int:pk>/',
         ProdutoDetailView.as_view(),
         name='produto-detail'
+    ),
+
+    path(
+        'pagina/',
+        produtos_page,
+        name='produtos-page'
     ),
 
     path(

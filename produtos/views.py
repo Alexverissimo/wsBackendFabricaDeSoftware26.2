@@ -1,4 +1,5 @@
-from rest_framework import generics, viewsets
+from rest_framework import generics, viewsets, filters
+from django.shortcuts import render
 
 from .models import Produto
 from .serializers import ProdutoSerializer
@@ -11,6 +12,15 @@ class ProdutoListView(generics.ListAPIView):
     ).all()
 
     serializer_class = ProdutoSerializer
+
+    filter_backends = [
+        filters.SearchFilter
+    ]
+
+    search_fields = [
+        'nome',
+        'descricao',
+    ]
 
 
 class ProdutoDetailView(generics.RetrieveAPIView):
@@ -29,3 +39,10 @@ class ProdutoViewSet(viewsets.ModelViewSet):
     ).all()
 
     serializer_class = ProdutoSerializer
+
+
+def produtos_page(request):
+    return render(
+        request,
+        'itens/produtos.html'
+    )
