@@ -5,7 +5,12 @@ from .views import (
     ProdutoListView,
     ProdutoDetailView,
     ProdutoViewSet,
-    produtos_page
+    produtos_page,
+    carrinho_page,
+    CarrinhoView,
+    AdicionarCarrinhoView,
+    RemoverItemCarrinhoView,
+    AlterarQuantidadeCarrinhoView
 )
 
 
@@ -19,17 +24,10 @@ router.register(
 
 
 urlpatterns = [
-
     path(
         '',
         ProdutoListView.as_view(),
         name='produtos-list'
-    ),
-
-    path(
-        '<int:pk>/',
-        ProdutoDetailView.as_view(),
-        name='produto-detail'
     ),
 
     path(
@@ -39,8 +37,43 @@ urlpatterns = [
     ),
 
     path(
+        'carrinho/',
+        CarrinhoView.as_view(),
+        name='carrinho'
+    ),
+
+    path(
+        'carrinho/adicionar/',
+        AdicionarCarrinhoView.as_view(),
+        name='carrinho-adicionar'
+    ),
+
+    path(
+        'carrinho/pagina/',
+        carrinho_page,
+        name='carrinho-page'
+    ),
+
+    path(
+        'carrinho/item/<int:item_id>/remover/',
+        RemoverItemCarrinhoView.as_view(),
+        name='carrinho-remover'
+    ),
+
+    path(
+        'carrinho/item/<int:item_id>/quantidade/',
+        AlterarQuantidadeCarrinhoView.as_view(),
+        name='carrinho-quantidade'
+    ),
+
+    path(
+        '<int:pk>/',
+        ProdutoDetailView.as_view(),
+        name='produto-detail'
+    ),
+
+    path(
         '',
         include(router.urls)
     ),
-
 ]

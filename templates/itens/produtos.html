@@ -21,6 +21,8 @@
 
 <body class="bg-light">
 
+    <!-- NAVBAR -->
+
     <nav class="navbar navbar-dark bg-primary">
 
         <div class="container">
@@ -42,6 +44,7 @@
                 </span>
 
                 <button
+                    id="cartButton"
                     class="btn btn-light"
                 >
                     🛒 Carrinho
@@ -61,12 +64,16 @@
     </nav>
 
 
+    <!-- CONTEÚDO -->
+
     <main class="container mt-5">
 
         <h1 class="mb-4">
             Produtos
         </h1>
 
+
+        <!-- PESQUISA -->
 
         <form
             id="searchForm"
@@ -94,6 +101,8 @@
         </form>
 
 
+        <!-- PRODUTOS -->
+
         <div
             id="productsContainer"
             class="row g-4"
@@ -115,12 +124,10 @@
                 'productsContainer'
             );
 
-
         const userName =
             document.getElementById(
                 'userName'
             );
-
 
         const logoutButton =
             document.getElementById(
@@ -197,6 +204,8 @@
         }
 
 
+        // CARREGAR PRODUTOS
+
         async function carregarProdutos(
             url = '/api/produtos/'
         ) {
@@ -213,7 +222,6 @@
                 const response =
                     await fetch(url);
 
-
                 const data =
                     await response.json();
 
@@ -223,14 +231,8 @@
                     productsContainer.innerHTML = `
                         <div class="col-12">
 
-                            <div
-                                class="
-                                    alert
-                                    alert-danger
-                                "
-                            >
-                                Erro ao carregar
-                                produtos.
+                            <div class="alert alert-danger">
+                                Erro ao carregar produtos.
                             </div>
 
                         </div>
@@ -249,14 +251,8 @@
                     productsContainer.innerHTML = `
                         <div class="col-12">
 
-                            <div
-                                class="
-                                    alert
-                                    alert-warning
-                                "
-                            >
-                                Nenhum produto
-                                encontrado.
+                            <div class="alert alert-warning">
+                                Nenhum produto encontrado.
                             </div>
 
                         </div>
@@ -308,12 +304,10 @@
                                 "
                             >
 
-                                <h5
-                                    class="
-                                        card-title
-                                    "
-                                >
+                                <h5 class="card-title">
+
                                     ${produto.nome}
+
                                 </h5>
 
 
@@ -323,14 +317,16 @@
                                         text-muted
                                     "
                                 >
+
                                     ${produto.descricao}
+
                                 </p>
 
 
-                                <h5
-                                    class="mt-auto"
-                                >
+                                <h5 class="mt-auto">
+
                                     R$ ${produto.preco}
+
                                 </h5>
 
 
@@ -340,8 +336,15 @@
                                         btn-primary
                                         mt-2
                                     "
+                                    onclick="
+                                        adicionarCarrinho(
+                                            ${produto.id}
+                                        )
+                                    "
                                 >
-                                    Comprar
+
+                                    🛒 Adicionar ao carrinho
+
                                 </button>
 
                             </div>
@@ -362,14 +365,11 @@
                 productsContainer.innerHTML = `
                     <div class="col-12">
 
-                        <div
-                            class="
-                                alert
-                                alert-danger
-                            "
-                        >
+                        <div class="alert alert-danger">
+
                             Não foi possível
                             conectar ao servidor.
+
                         </div>
 
                     </div>
@@ -383,8 +383,87 @@
         }
 
 
+        async function adicionarCarrinho(
+            produtoId
+        ) {
+
+            const token =
+                localStorage.getItem(
+                    'access_token'
+                );
+
+
+            if (!token) {
+
+                window.location.href = '/';
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        '/api/produtos/carrinho/adicionar/',
+                        {
+                            method: 'POST',
+
+                            headers: {
+
+                                'Content-Type':
+                                    'application/json',
+
+                                'Authorization':
+                                    `Bearer ${token}`
+
+                            },
+
+                            body: JSON.stringify({
+                                produto_id: produtoId
+                            })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    alert(
+                        data.detail ||
+                        'Erro ao adicionar produto.'
+                    );
+
+                    return;
+
+                }
+
+
+                alert(
+                    'Produto adicionado ao carrinho!'
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    'Não foi possível adicionar o produto.'
+                );
+
+            }
+
+        }
+
         document
-            .getElementById('searchForm')
+            .getElementById(
+                'searchForm'
+            )
             .addEventListener(
                 'submit',
                 event => {
@@ -412,7 +491,9 @@
 
                     const url =
                         `/api/produtos/?search=${
-                            encodeURIComponent(search)
+                            encodeURIComponent(
+                                search
+                            )
                         }`;
 
 
@@ -420,7 +501,7 @@
 
                 }
             );
-
+        
 
         logoutButton.addEventListener(
             'click',
@@ -439,7 +520,7 @@
 
             }
         );
-
+        
 
         carregarUsuario();
 
