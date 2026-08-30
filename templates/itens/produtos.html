@@ -32,9 +32,29 @@
                 Minha Loja
             </a>
 
-            <button class="btn btn-light">
-                🛒 Carrinho
-            </button>
+            <div class="d-flex align-items-center gap-3">
+
+                <span
+                    id="userName"
+                    class="text-white"
+                >
+                    Carregando usuário...
+                </span>
+
+                <button
+                    class="btn btn-light"
+                >
+                    🛒 Carrinho
+                </button>
+
+                <button
+                    id="logoutButton"
+                    class="btn btn-danger"
+                >
+                    Sair
+                </button>
+
+            </div>
 
         </div>
 
@@ -91,7 +111,90 @@
     <script>
 
         const productsContainer =
-            document.getElementById('productsContainer');
+            document.getElementById(
+                'productsContainer'
+            );
+
+
+        const userName =
+            document.getElementById(
+                'userName'
+            );
+
+
+        const logoutButton =
+            document.getElementById(
+                'logoutButton'
+            );
+
+
+        async function carregarUsuario() {
+
+            const token =
+                localStorage.getItem(
+                    'access_token'
+                );
+
+
+            if (!token) {
+
+                window.location.href = '/';
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        '/api/auth/me/',
+                        {
+                            headers: {
+
+                                'Authorization':
+                                    `Bearer ${token}`
+
+                            }
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    localStorage.removeItem(
+                        'access_token'
+                    );
+
+                    localStorage.removeItem(
+                        'refresh_token'
+                    );
+
+                    window.location.href = '/';
+
+                    return;
+
+                }
+
+
+                const usuario =
+                    await response.json();
+
+
+                userName.textContent =
+                    `Olá, ${usuario.username}`;
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                window.location.href = '/';
+
+            }
+
+        }
 
 
         async function carregarProdutos(
@@ -107,20 +210,34 @@
 
             try {
 
-                const response = await fetch(url);
+                const response =
+                    await fetch(url);
 
-                const data = await response.json();
+
+                const data =
+                    await response.json();
 
 
                 if (!response.ok) {
 
                     productsContainer.innerHTML = `
-                        <div class="alert alert-danger">
-                            Erro ao carregar produtos.
+                        <div class="col-12">
+
+                            <div
+                                class="
+                                    alert
+                                    alert-danger
+                                "
+                            >
+                                Erro ao carregar
+                                produtos.
+                            </div>
+
                         </div>
                     `;
 
                     return;
+
                 }
 
 
@@ -132,23 +249,31 @@
                     productsContainer.innerHTML = `
                         <div class="col-12">
 
-                            <div class="alert alert-warning">
-
-                                Nenhum produto encontrado.
-
+                            <div
+                                class="
+                                    alert
+                                    alert-warning
+                                "
+                            >
+                                Nenhum produto
+                                encontrado.
                             </div>
 
                         </div>
                     `;
 
                     return;
+
                 }
 
 
                 data.forEach(produto => {
 
                     const card =
-                        document.createElement('div');
+                        document.createElement(
+                            'div'
+                        );
+
 
                     card.className =
                         'col-md-4 col-lg-3';
@@ -156,7 +281,13 @@
 
                     card.innerHTML = `
 
-                        <div class="card h-100 shadow-sm">
+                        <div
+                            class="
+                                card
+                                h-100
+                                shadow-sm
+                            "
+                        >
 
                             <img
                                 src="${produto.imagem}"
@@ -168,6 +299,7 @@
                                 "
                             >
 
+
                             <div
                                 class="
                                     card-body
@@ -176,10 +308,12 @@
                                 "
                             >
 
-                                <h5 class="card-title">
-
+                                <h5
+                                    class="
+                                        card-title
+                                    "
+                                >
                                     ${produto.nome}
-
                                 </h5>
 
 
@@ -189,16 +323,14 @@
                                         text-muted
                                     "
                                 >
-
                                     ${produto.descricao}
-
                                 </p>
 
 
-                                <h5 class="mt-auto">
-
+                                <h5
+                                    class="mt-auto"
+                                >
                                     R$ ${produto.preco}
-
                                 </h5>
 
 
@@ -209,9 +341,7 @@
                                         mt-2
                                     "
                                 >
-
                                     Comprar
-
                                 </button>
 
                             </div>
@@ -221,9 +351,8 @@
                     `;
 
 
-                    productsContainer.appendChild(
-                        card
-                    );
+                    productsContainer
+                        .appendChild(card);
 
                 });
 
@@ -233,15 +362,19 @@
                 productsContainer.innerHTML = `
                     <div class="col-12">
 
-                        <div class="alert alert-danger">
-
+                        <div
+                            class="
+                                alert
+                                alert-danger
+                            "
+                        >
                             Não foi possível
                             conectar ao servidor.
-
                         </div>
 
                     </div>
                 `;
+
 
                 console.error(error);
 
@@ -288,6 +421,27 @@
                 }
             );
 
+
+        logoutButton.addEventListener(
+            'click',
+            () => {
+
+                localStorage.removeItem(
+                    'access_token'
+                );
+
+                localStorage.removeItem(
+                    'refresh_token'
+                );
+
+
+                window.location.href = '/';
+
+            }
+        );
+
+
+        carregarUsuario();
 
         carregarProdutos();
 
